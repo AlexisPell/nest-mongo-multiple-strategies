@@ -6,9 +6,6 @@ export class AuthController {
   @Get('/discord/login')
   @UseGuards(DiscordAuthGuard)
   login(@Req() req: any) {
-    console.log('REQUEST USER:', req.user);
-    console.log('REQUEST SESSION:', req.session);
-    console.log('REQUEST COOKIE:', req.cookies);
     return;
   }
 

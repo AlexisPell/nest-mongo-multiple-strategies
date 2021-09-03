@@ -52,8 +52,23 @@ export class UsersService {
     const candidateByDiscordId = await this.userModel.findOne({
       discordId: profileDto.id,
     });
+    await this.checkUnverifiedEmail(profileDto.email);
+
     if (candidateByDiscordId) return candidateByDiscordId;
     const user = await this.userModel.create(profileDto);
     return user;
+  }
+
+  private async checkUnverifiedEmail(checkingEmail: string) {
+    const usersWithSameEmail = await this.userModel.find({
+      email: checkingEmail,
+    });
+    if (usersWithSameEmail.length) {
+      console.log(`USERS SERVICE / REMOVING UNVERIFIED EMAIL`);
+      const unverifiedSameMails = usersWithSameEmail
+        .filter((u) => !u.locallyVerified)
+        .map((u) => u.email);
+      await this.userModel.deleteMany({ email: { $in: unverifiedSameMails } });
+    }
   }
 }

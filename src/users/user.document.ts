@@ -17,7 +17,7 @@ export class User extends Document {
   @Prop({ type: String, minlength: 6, required: false })
   username: string;
 
-  @Prop({ type: String })
+  @Prop({ type: String, unique: true })
   discordId: string;
 
   @Prop({ type: String })
