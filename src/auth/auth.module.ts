@@ -1,17 +1,18 @@
-import { User, UserSchema } from './../users/user.schema';
+import { UserSchema, User } from './../users/user.document';
 import { UsersModule } from './../users/users.module';
-import { DiscordStrategy } from './strategies/discord-auth.strategy';
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
+import { DiscordStrategy } from './strategies/discord.strategy';
 import { MongooseModule } from '@nestjs/mongoose';
 
 @Module({
-  imports: [
-    MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
-    UsersModule,
-  ],
   controllers: [AuthController],
   providers: [AuthService, DiscordStrategy],
+  imports: [
+    MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
+    forwardRef(() => UsersModule),
+  ],
+  exports: [AuthService],
 })
 export class AuthModule {}

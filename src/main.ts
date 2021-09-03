@@ -3,6 +3,7 @@ import { AppModule } from './app.module';
 import * as session from 'express-session';
 import * as passport from 'passport';
 import * as cookieParser from 'cookie-parser';
+import { ValidationPipe } from './common/pipes/validation.pipe';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -22,6 +23,8 @@ async function bootstrap() {
 
   app.use(passport.initialize());
   app.use(passport.session());
+
+  app.useGlobalPipes(new ValidationPipe());
 
   const PORT = process.env.PORT;
   await app.listen(PORT);
