@@ -1,10 +1,7 @@
 import { CreateUserDto } from './dto/create-user.dto';
 import { UsersService } from './users.service';
-import { Body, Get, Param, Post, UsePipes } from '@nestjs/common';
+import { Body, Get, Post } from '@nestjs/common';
 import { Controller } from '@nestjs/common';
-import { ValidationPipe } from 'src/common/pipes/validation.pipe';
-import { ObjectId } from 'mongoose';
-import { Request } from 'express';
 
 @Controller('users')
 export class UsersController {
@@ -22,6 +19,6 @@ export class UsersController {
 
   @Post()
   createUser(@Body() dto: CreateUserDto) {
-    return this.usersService.createLocal(dto);
+    return this.usersService.create(dto);
   }
 }

@@ -1,8 +1,10 @@
+import { CreateUserDto } from './../users/dto/create-user.dto';
 import { UsersService } from './../users/users.service';
 import { User, UserDocument } from './../users/user.document';
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { Profile as DiscordProfile } from 'passport-discord';
 import { Model } from 'mongoose';
+import * as bcrypt from 'bcryptjs';
 import { InjectModel } from '@nestjs/mongoose';
 
 @Injectable()
@@ -12,13 +14,49 @@ export class AuthService {
     @InjectModel(User.name) private userModel: Model<UserDocument>,
   ) {}
 
+  async login(userDto: CreateUserDto) {
+    const user = this.userModel.findOne({ email: userDto.email });
+    return user;
+  }
+
+  async registration(userDto: CreateUserDto) {
+    console.log('AUTH SERVICE / REGISTRATION');
+    const hashPassword = await bcrypt.hash(userDto.password, 5);
+    const user = await this.usersService.create({
+      ...userDto,
+      password: hashPassword,
+    });
+    return user;
+  }
+
   async validateDiscordProfile(userDto: DiscordProfile): Promise<User> {
-    console.log('AUTH SERVICE / VALIDATE / INIT', userDto);
+    console.log('AUTH SERVICE / VALIDATE DISCORD / INIT', userDto);
     const user = await this.userModel.findOne({ discordId: userDto.id });
-    console.log('AUTH SERVICE / VALIDATE / USER', user);
+    console.log('AUTH SERVICE / VALIDATE DISCORD / USER', user);
     if (user) return user;
-    const newUser = await this.usersService.createForDiscord(userDto);
-    console.log('AUTH SERVICE / VALIDATE / NEW USER', newUser);
+    const newUser = await this.usersService.createForDiscordStrategy(userDto);
+    console.log('AUTH SERVICE / VALIDATE DISCORD / NEW USER', newUser);
     return newUser;
   }
+  async validateLocalUser(userDto: CreateUserDto): Promise<User> {
+    console.log('AUTH SERVICE / VALIDATE LOCAL / INIT');
+    const user = await this.userModel.findOne({ email: userDto.email });
+    if (user) {
+      console.log('AUTH SERVICE / VALIDATE LOCAL / USER FOUND');
+      const passwordsEqual = await bcrypt.compare(
+        userDto.password,
+        user.password,
+      );
+      console.log('AUTH SERVICE / VALIDATE LOCAL / PASSWORD MATCHED');
+      if (passwordsEqual) return user;
+    } else {
+      const newUser = await this.usersService.create(userDto);
+      console.log('AUTH SERVICE / VALIDATE LOCAL / USER CREATED');
+
+      return newUser;
+    }
+  }
 }
+// TODO: Login under protection
+// In login validate only find user
+// Register reroutes to login on finish

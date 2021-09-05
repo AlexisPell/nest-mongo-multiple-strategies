@@ -36,30 +36,24 @@ export class UsersService {
     return user;
   }
 
-  async createLocal(validatedDto: CreateUserDto): Promise<User> {
-    const candidate = await this.userModel.findOne({
-      email: validatedDto.email,
-    });
-    if (candidate) {
-      throw new BadRequestException('User with such email already exists');
-    }
+  async create(validatedDto: CreateUserDto): Promise<User> {
     const user = await this.userModel.create(validatedDto);
     return user;
   }
 
-  async createForDiscord(profileDto: DiscordProfile): Promise<User> {
+  async createForDiscordStrategy(profileDto: DiscordProfile): Promise<User> {
     console.log('USERS SERVICE / createForDiscord');
     const candidateByDiscordId = await this.userModel.findOne({
       discordId: profileDto.id,
     });
-    await this.checkUnverifiedEmail(profileDto.email);
+    await this.checkUnverifiedSameEmails(profileDto.email);
 
     if (candidateByDiscordId) return candidateByDiscordId;
     const user = await this.userModel.create(profileDto);
     return user;
   }
 
-  private async checkUnverifiedEmail(checkingEmail: string) {
+  private async checkUnverifiedSameEmails(checkingEmail: string) {
     const usersWithSameEmail = await this.userModel.find({
       email: checkingEmail,
     });
