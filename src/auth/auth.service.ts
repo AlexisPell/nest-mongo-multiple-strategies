@@ -1,7 +1,7 @@
 import { CreateUserDto } from './../users/dto/create-user.dto';
 import { UsersService } from './../users/users.service';
 import { User, UserDocument } from './../users/user.document';
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { Profile as DiscordProfile } from 'passport-discord';
 import { Model } from 'mongoose';
 import * as bcrypt from 'bcryptjs';
@@ -21,6 +21,8 @@ export class AuthService {
 
   async registration(userDto: CreateUserDto) {
     console.log('AUTH SERVICE / REGISTRATION');
+    const candidate = await this.userModel.findOne({ email: userDto.email });
+    if (candidate) throw new BadRequestException('Such user already exists');
     const hashPassword = await bcrypt.hash(userDto.password, 5);
     const user = await this.usersService.create({
       ...userDto,
@@ -41,20 +43,17 @@ export class AuthService {
   async validateLocalUser(userDto: CreateUserDto): Promise<User> {
     console.log('AUTH SERVICE / VALIDATE LOCAL / INIT');
     const user = await this.userModel.findOne({ email: userDto.email });
-    if (user) {
-      console.log('AUTH SERVICE / VALIDATE LOCAL / USER FOUND');
-      const passwordsEqual = await bcrypt.compare(
-        userDto.password,
-        user.password,
-      );
-      console.log('AUTH SERVICE / VALIDATE LOCAL / PASSWORD MATCHED');
-      if (passwordsEqual) return user;
-    } else {
-      const newUser = await this.usersService.create(userDto);
-      console.log('AUTH SERVICE / VALIDATE LOCAL / USER CREATED');
-
-      return newUser;
-    }
+    if (!user)
+      throw new BadRequestException('User with such credentials not found');
+    console.log('AUTH SERVICE / VALIDATE LOCAL / USER FOUND');
+    const passwordsEqual = await bcrypt.compare(
+      userDto.password,
+      user.password,
+    );
+    console.log('AUTH SERVICE / VALIDATE LOCAL / PASSWORD MATCHED');
+    if (passwordsEqual) return user;
+    if (!passwordsEqual)
+      throw new BadRequestException('Wrong password provided');
   }
 }
 // TODO: Login under protection

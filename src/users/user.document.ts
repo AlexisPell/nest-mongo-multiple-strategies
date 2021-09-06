@@ -11,13 +11,13 @@ export class User extends Document {
   @Prop({ type: Boolean, default: false })
   locallyVerified: boolean;
 
-  @Prop({ type: String, minlength: 6 })
+  @Prop({ type: String, minlength: 6, select: false })
   password: string;
 
   @Prop({ type: String, minlength: 6, required: false })
   username: string;
 
-  @Prop({ type: String, unique: true })
+  @Prop({ type: String, unique: true, sparse: true }) // sparse to let uniqie while null
   discordId: string;
 
   @Prop({ type: String })
