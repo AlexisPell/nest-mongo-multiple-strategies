@@ -3,6 +3,7 @@ import { UsersService } from './../users/users.service';
 import { User, UserDocument } from './../users/user.document';
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { Profile as DiscordProfile } from 'passport-discord';
+import { Profile as GoogleProfile } from 'passport-google-oauth20';
 import { Model } from 'mongoose';
 import * as bcrypt from 'bcryptjs';
 import { InjectModel } from '@nestjs/mongoose';
@@ -38,6 +39,15 @@ export class AuthService {
     console.log('AUTH SERVICE / VALIDATE DISCORD / NEW USER', newUser);
     return newUser;
   }
+  async validateGoogleProfile(userDto: GoogleProfile): Promise<User> {
+    console.log('AUTH SERVICE / VALIDATE GOOGLE / INIT', userDto);
+    const user = await this.userModel.findOne({ googleId: userDto.id });
+    console.log('AUTH SERVICE / VALIDATE GOOGLE / USER', user);
+    if (user) return user;
+    const newUser = await this.usersService.createForGoogleStrategy(userDto);
+    console.log('AUTH SERVICE / VALIDATE GOOGLE / NEW USER', newUser);
+    return newUser;
+  }
   async validateLocalUser(userDto: CreateUserDto): Promise<User> {
     console.log('AUTH SERVICE / VALIDATE LOCAL / INIT');
     const user = await this.userModel.findOne({ email: userDto.email });
@@ -54,6 +64,3 @@ export class AuthService {
       throw new BadRequestException('Wrong password provided');
   }
 }
-// TODO: Login under protection
-// In login validate only find user
-// Register reroutes to login on finish

@@ -25,7 +25,7 @@ export class GoogleStrategy extends PassportStrategy(
     done: VerifyCallback,
   ): Promise<any> {
     console.log('GOOGLE STRATEGY: ', accessToken, refreshToken, profile);
-    const user = await this.authService.validateDiscordProfile(profile);
+    const user = await this.authService.validateGoogleProfile(profile);
     if (!user) {
       console.log('GOOGLE STRATEGY / !USER');
       throw new UnauthorizedException('!USER');

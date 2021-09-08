@@ -1,3 +1,4 @@
+import { apiPrefix } from './../../common/constants/paths';
 import { GoogleAuthGuard } from '../guards/google.guard';
 import { Controller, Get, Res, UseGuards } from '@nestjs/common';
 import { AuthService } from '../auth.service';
@@ -14,6 +15,6 @@ export class GoogleAuthController {
   @Get('/google/redirect')
   @UseGuards(GoogleAuthGuard)
   redirect(@Res() res: any) {
-    res.redirect(`me`);
+    res.redirect(`${apiPrefix}/auth/me`);
   }
 }

@@ -1,11 +1,8 @@
 import { Profile as DiscordProfile } from 'passport-discord';
+import { Profile as GoogleProfile } from 'passport-google-oauth20';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UserDocument, User } from './user.document';
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
@@ -37,28 +34,55 @@ export class UsersService {
     return user;
   }
 
-  async createForDiscordStrategy(profileDto: DiscordProfile): Promise<User> {
+  async createForDiscordStrategy(
+    discordPayload: DiscordProfile,
+  ): Promise<User> {
     console.log('USERS SERVICE / createForDiscord');
     const candidateByDiscordId = await this.userModel.findOne({
-      discordId: profileDto.id,
+      discordId: discordPayload.id,
     });
-    await this.checkUnverifiedSameEmails(profileDto.email);
-
     if (candidateByDiscordId) return candidateByDiscordId;
-    const user = await this.userModel.create(profileDto);
+    const userPayload: Partial<User> = {
+      email: discordPayload.email,
+      locallyVerified: discordPayload.verified,
+      username: discordPayload.username,
+      discordId: discordPayload.id,
+      avatar: discordPayload.avatar,
+    };
+    const user = await this.userModel.create(userPayload);
+    return user;
+  }
+  async createForGoogleStrategy(googlePayload: GoogleProfile): Promise<User> {
+    console.log('USERS SERVICE / createForGoogle');
+    const candidateByGoogleId = await this.userModel.findOne({
+      discordId: googlePayload.id,
+    });
+    if (candidateByGoogleId) return candidateByGoogleId;
+
+    const userPayload: Partial<User> = {
+      email: googlePayload._json.email,
+      locallyVerified: googlePayload._json.email_verified,
+      username: googlePayload._json.name,
+      googleId: googlePayload.id,
+      ...(googlePayload.photos[0].value && {
+        avatar: googlePayload.photos[0].value,
+      }),
+    };
+    const user = await this.userModel.create(userPayload);
     return user;
   }
 
-  private async checkUnverifiedSameEmails(checkingEmail: string) {
-    const usersWithSameEmail = await this.userModel.find({
-      email: checkingEmail,
-    });
-    if (usersWithSameEmail.length) {
-      console.log(`USERS SERVICE / REMOVING UNVERIFIED EMAIL`);
-      const unverifiedSameMails = usersWithSameEmail
-        .filter((u) => !u.locallyVerified)
-        .map((u) => u.email);
-      await this.userModel.deleteMany({ email: { $in: unverifiedSameMails } });
-    }
-  }
+  // TODO: For further re-working
+  // private async checkUnverifiedSameEmails(checkingEmail: string) {
+  //   const usersWithSameEmail = await this.userModel.find({
+  //     email: checkingEmail,
+  //   });
+  //   if (usersWithSameEmail.length) {
+  //     console.log(`USERS SERVICE / REMOVING UNVERIFIED EMAIL`);
+  //     const unverifiedSameMails = usersWithSameEmail
+  //       .filter((u) => !u.locallyVerified)
+  //       .map((u) => u.email);
+  //     await this.userModel.deleteMany({ email: { $in: unverifiedSameMails } });
+  //   }
+  // }
 }

@@ -18,10 +18,9 @@ export class User extends Document {
   username: string;
 
   @Prop({ type: String, unique: true, sparse: true }) // sparse to let uniqie while null
+  googleId: string;
+  @Prop({ type: String, unique: true, sparse: true }) // sparse to let uniqie while null
   discordId: string;
-
-  @Prop({ type: String })
-  discriminator: string;
 
   @Prop({ type: String })
   avatar: string;
