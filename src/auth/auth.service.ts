@@ -24,10 +24,8 @@ export class AuthService {
     const candidate = await this.userModel.findOne({ email: userDto.email });
     if (candidate) throw new BadRequestException('Such user already exists');
     const hashPassword = await bcrypt.hash(userDto.password, 5);
-    const user = await this.usersService.create({
-      ...userDto,
-      password: hashPassword,
-    });
+    const _user: CreateUserDto = { ...userDto, password: hashPassword };
+    const user = await this.userModel.create(_user);
     return user;
   }
 

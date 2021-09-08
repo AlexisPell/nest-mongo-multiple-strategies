@@ -1,7 +1,6 @@
 import { ValidationPipe } from './../../common/pipes/validation.pipe';
 import { CreateUserDto } from './../../users/dto/create-user.dto';
 import { AuthenticatedGuard } from '../guards/isAuthenticated.guard';
-import { DiscordAuthGuard } from '../guards/discord.guard';
 import {
   Body,
   Controller,
@@ -17,8 +16,9 @@ import { LocalAuthGuard } from '../guards/local.guard';
 import { AuthService } from '../auth.service';
 
 @Controller('auth')
-export class SSOAuthController {
+export class AuthController {
   constructor(private authService: AuthService) {}
+
   @Get('me')
   @UseGuards(AuthenticatedGuard)
   status(@Req() req: Request) {
@@ -27,34 +27,23 @@ export class SSOAuthController {
     console.log('REQUEST COOKIE:', req.cookies);
     return req.user;
   }
-  @Get('logout')
-  logout(@Req() req: Request, @Res() res: Response) {
-    req.logout();
-    res.redirect(`me`);
-  }
 
-  // LOCAL
   @Post('login')
   @UsePipes(new ValidationPipe())
   @UseGuards(LocalAuthGuard)
   login(@Res() res: Response) {
     res.redirect(`me`);
   }
+
   @Post('register')
   async register(@Body() body: CreateUserDto, @Res() res: Response) {
     await this.authService.registration(body);
     res.redirect(307, 'login');
   }
 
-  // DISCORD
-  @Get('/discord/login')
-  @UseGuards(DiscordAuthGuard)
-  loginDiscord() {
-    return;
-  }
-  @Get('/discord/redirect')
-  @UseGuards(DiscordAuthGuard)
-  redirect(@Res() res: any) {
+  @Get('logout')
+  logout(@Req() req: Request, @Res() res: Response) {
+    req.logout();
     res.redirect(`me`);
   }
 }

@@ -13,11 +13,6 @@ async function bootstrap() {
 
   const redisClient = redis.createClient({ url: process.env.REDIS_URI });
   const RedisStore = connectRedis(session);
-  // redisClient.on("", () => console.log('Started Reddis'))
-  console.log(
-    '🚀 ~ file: main.ts ~ line 14 ~ bootstrap ~ redisClient',
-    redisClient,
-  );
 
   app.setGlobalPrefix(apiPrefix);
 

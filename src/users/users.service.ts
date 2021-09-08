@@ -32,7 +32,7 @@ export class UsersService {
     return user;
   }
 
-  async create(validatedDto: CreateUserDto): Promise<User> {
+  async createUser(validatedDto: CreateUserDto): Promise<User> {
     const user = await this.userModel.create(validatedDto);
     return user;
   }
