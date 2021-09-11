@@ -14,11 +14,23 @@ import {
 import { Request, Response } from 'express';
 import { LocalAuthGuard } from '../guards/local.guard';
 import { AuthService } from '../auth.service';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiCreatedResponse,
+  ApiOkResponse,
+  ApiBody,
+  ApiQuery,
+} from '@nestjs/swagger';
+import { User } from 'src/users/user.document';
 
+@ApiTags('Authorization')
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
 
+  @ApiOperation({ summary: 'Get me, if logged in' })
+  @ApiOkResponse({ type: User, description: 'User' })
   @Get('me')
   @UseGuards(AuthenticatedGuard)
   status(@Req() req: Request) {

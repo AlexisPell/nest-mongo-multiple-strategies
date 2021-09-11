@@ -53,13 +53,15 @@ export class AuthService {
     const user = await this.userModel.findOne({ email: userDto.email });
     if (!user)
       throw new BadRequestException('User with such credentials not found');
-    console.log('AUTH SERVICE / VALIDATE LOCAL / USER FOUND');
+    console.log('AUTH SERVICE / VALIDATE LOCAL / USER FOUND', user);
     const passwordsEqual = await bcrypt.compare(
       userDto.password,
-      user.password,
+      user.password || '',
     );
-    console.log('AUTH SERVICE / VALIDATE LOCAL / PASSWORD MATCHED');
-    if (passwordsEqual) return user;
+    if (passwordsEqual) {
+      console.log('AUTH SERVICE / VALIDATE LOCAL / PASSWORD MATCHED');
+      return user;
+    }
     if (!passwordsEqual)
       throw new BadRequestException('Wrong password provided');
   }

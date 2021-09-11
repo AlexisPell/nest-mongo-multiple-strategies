@@ -17,6 +17,10 @@ export class UsersService {
 
   async getUserByEmail(email: string): Promise<User | undefined> {
     const user = await this.userModel.findOne({ email });
+    if (!user) {
+      console.log('USER SERVICE / GET BY ID');
+      throw new NotFoundException("User with such email doesn't exist");
+    }
     return user;
   }
 
