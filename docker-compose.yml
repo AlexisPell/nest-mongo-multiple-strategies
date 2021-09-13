@@ -1,0 +1,52 @@
+version: '3.7'
+
+services:
+  nestjs:
+    container_name: nestjs
+    hostname: nestjs
+    build:
+      context: .
+      target: production
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+    ports:
+      - 5000:5000
+    command: npm run start:prod
+    env_file:
+      - .production.env
+    networks:
+      - webnet
+    depends_on:
+      - redis
+      - mongo
+
+  redis:
+    container_name: redis
+    image: redis:5
+    networks:
+      - webnet
+
+  mongo:
+    container_name: mongo
+    image: mongo:latest
+    ports:
+      - 27017:27017
+    networks:
+      - webnet
+
+  nginx:
+    build:
+      context: ./nginx
+    container_name: nginx
+    hostname: nginx
+    ports:
+      - 80:80
+    depends_on:
+      - nestjs
+    networks:
+      - webnet
+
+networks:
+  webnet:
+    external: true

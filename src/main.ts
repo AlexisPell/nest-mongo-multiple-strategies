@@ -24,8 +24,8 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup(`${apiPrefix}/docs`, app, document);
 
-  const redisClient = redis.createClient({ url: process.env.REDIS_URI });
-  const RedisStore = connectRedis(session);
+  // const redisClient = redis.createClient({ url: process.env.REDIS_URI });
+  // const RedisStore = connectRedis(session);
 
   app.use(cookieParser());
 
@@ -36,7 +36,7 @@ async function bootstrap() {
       name: 'userSession',
       resave: false,
       saveUninitialized: false,
-      store: new RedisStore({ client: redisClient }),
+      // store: new RedisStore({ client: redisClient }),
     }),
   );
 
@@ -46,6 +46,8 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe());
 
   const PORT = process.env.PORT;
-  await app.listen(PORT);
+  await app.listen(PORT, () =>
+    console.log(`SERVER IS RUNNING ON PORT ${process.env.PORT}`),
+  );
 }
 bootstrap();
