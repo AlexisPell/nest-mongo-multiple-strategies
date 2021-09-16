@@ -5,6 +5,7 @@ import {
   Body,
   Controller,
   Get,
+  Logger,
   Post,
   Req,
   Res,
@@ -20,6 +21,7 @@ import { User } from 'src/users/user.document';
 @ApiTags('Authorization')
 @Controller('auth')
 export class AuthController {
+  private readonly logger = new Logger(AuthController.name);
   constructor(private authService: AuthService) {}
 
   @ApiOperation({ summary: 'Get me, if logged in' })
@@ -30,7 +32,13 @@ export class AuthController {
     console.log('REQUEST USER:', req.user);
     console.log('REQUEST SESSION:', req.session);
     console.log('REQUEST COOKIE:', req.cookies);
+    this.logger.log('Request user:', req.user);
     return req.user;
+  }
+
+  @Get('mi')
+  stat() {
+    throw new Error('Ker');
   }
 
   @Post('login')

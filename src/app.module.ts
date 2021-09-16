@@ -5,12 +5,14 @@ import { PassportModule } from '@nestjs/passport';
 
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
+import { LoggerModule } from './logger/logger.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ envFilePath: `.${process.env.NODE_ENV}.env` }),
     MongooseModule.forRoot(process.env.MONGO_URI as string),
     PassportModule.register({ session: true }),
+    LoggerModule,
     UsersModule,
     AuthModule,
   ],
