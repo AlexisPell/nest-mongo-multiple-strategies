@@ -1,10 +1,10 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import * as session from 'express-session';
-import * as passport from 'passport';
-import * as cookieParser from 'cookie-parser';
-import * as redis from 'redis';
-import * as connectRedis from 'connect-redis';
+import session from 'express-session';
+import passport from 'passport';
+import cookieParser from 'cookie-parser';
+import redis from 'redis';
+import connectRedis from 'connect-redis';
 import { ValidationPipe } from './common/pipes/validation.pipe';
 import { apiPrefix } from './common/constants/paths';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
@@ -24,8 +24,8 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup(`${apiPrefix}/docs`, app, document);
 
-  // const redisClient = redis.createClient({ url: process.env.REDIS_URI });
-  // const RedisStore = connectRedis(session);
+  const redisClient = redis.createClient({ url: process.env.REDIS_URI });
+  const RedisStore = connectRedis(session);
 
   app.use(cookieParser());
 
@@ -36,7 +36,7 @@ async function bootstrap() {
       name: 'userSession',
       resave: false,
       saveUninitialized: false,
-      // store: new RedisStore({ client: redisClient }),
+      store: new RedisStore({ client: redisClient }),
     }),
   );
 
@@ -45,7 +45,7 @@ async function bootstrap() {
 
   app.useGlobalPipes(new ValidationPipe());
 
-  const PORT = process.env.PORT;
+  const PORT = process.env.PORT as string;
   await app.listen(PORT, () =>
     console.log(`SERVER IS RUNNING ON PORT ${process.env.PORT}`),
   );

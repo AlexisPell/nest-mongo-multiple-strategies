@@ -48,7 +48,7 @@ export class AuthService {
     console.log('AUTH SERVICE / VALIDATE GOOGLE / NEW USER', newUser);
     return newUser;
   }
-  async validateLocalUser(userDto: CreateUserDto): Promise<User> {
+  async validateLocalUser(userDto: CreateUserDto): Promise<User | undefined> {
     console.log('AUTH SERVICE / VALIDATE LOCAL / INIT');
     const user = await this.userModel.findOne({ email: userDto.email });
     if (!user)
@@ -64,5 +64,6 @@ export class AuthService {
     }
     if (!passwordsEqual)
       throw new BadRequestException('Wrong password provided');
+    return;
   }
 }

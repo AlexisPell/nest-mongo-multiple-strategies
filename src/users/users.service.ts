@@ -56,11 +56,15 @@ export class UsersService {
     const user = await this.userModel.create(userPayload);
     return user;
   }
-  async createForGoogleStrategy(googlePayload: GoogleProfile): Promise<User> {
+  async createForGoogleStrategy(googlePayload: any): Promise<User> {
     console.log('USERS SERVICE / createForGoogle');
     const candidateByGoogleId = await this.userModel.findOne({
       discordId: googlePayload.id,
     });
+    console.log(
+      'USERS SERVICE / createForGoogle/ found user',
+      candidateByGoogleId,
+    );
     if (candidateByGoogleId) return candidateByGoogleId;
 
     const userPayload: Partial<User> = {

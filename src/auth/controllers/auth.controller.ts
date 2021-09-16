@@ -14,14 +14,7 @@ import {
 import { Request, Response } from 'express';
 import { LocalAuthGuard } from '../guards/local.guard';
 import { AuthService } from '../auth.service';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiCreatedResponse,
-  ApiOkResponse,
-  ApiBody,
-  ApiQuery,
-} from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiOkResponse } from '@nestjs/swagger';
 import { User } from 'src/users/user.document';
 
 @ApiTags('Authorization')
