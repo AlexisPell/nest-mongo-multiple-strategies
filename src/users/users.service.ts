@@ -1,14 +1,21 @@
 import { Profile as DiscordProfile } from 'passport-discord';
 import { Profile as GoogleProfile } from 'passport-google-oauth20';
 import { CreateUserDto } from './dto/create-user.dto';
-import { UserDocument, User } from './user.document';
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
+import { UserDocument, User } from './models/user.document';
+import { Profile, ProfileDocument } from './models/profile.document';
+
 @Injectable()
 export class UsersService {
-  constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
+  private logger: Logger = new Logger(UsersService.name);
+
+  constructor(
+    @InjectModel(User.name) private userModel: Model<UserDocument>,
+    @InjectModel(Profile.name) private profileModel: Model<ProfileDocument>,
+  ) {}
 
   async getUsers(): Promise<User[]> {
     const users = await this.userModel.find();
@@ -18,7 +25,7 @@ export class UsersService {
   async getUserByEmail(email: string): Promise<User | undefined> {
     const user = await this.userModel.findOne({ email });
     if (!user) {
-      console.log('USER SERVICE / GET BY ID');
+      this.logger.log('GET BY EMAIL EXCEPTION');
       throw new NotFoundException("User with such email doesn't exist");
     }
     return user;
@@ -27,7 +34,7 @@ export class UsersService {
   async getUserById(id: string): Promise<User> {
     const user = await this.userModel.findById(id);
     if (!user) {
-      console.log('USER SERVICE / GET BY ID');
+      this.logger.log('GET BY ID EXCEPTION');
       throw new NotFoundException("User with such email doesn't exist");
     }
     return user;
@@ -41,42 +48,58 @@ export class UsersService {
   async createForDiscordStrategy(
     discordPayload: DiscordProfile,
   ): Promise<User> {
-    console.log('USERS SERVICE / createForDiscord');
+    this.logger.log('createForDiscord / init', discordPayload);
     const candidateByDiscordId = await this.userModel.findOne({
       discordId: discordPayload.id,
     });
-    if (candidateByDiscordId) return candidateByDiscordId;
+    if (candidateByDiscordId) {
+      this.logger.log('createForDiscord / found local user by discordId');
+      return candidateByDiscordId;
+    }
+
     const userPayload: Partial<User> = {
       email: discordPayload.email,
       locallyVerified: discordPayload.verified,
-      username: discordPayload.username,
       discordId: discordPayload.id,
-      avatar: discordPayload.avatar,
     };
     const user = await this.userModel.create(userPayload);
+
+    const profilePayload: Partial<Profile> = {};
+    profilePayload.user = user._id; // NOTE: doesnt apply to profileModel
+    if (discordPayload.username)
+      profilePayload.username = discordPayload.username;
+    if (discordPayload.avatar) profilePayload.avatar = discordPayload.avatar;
+
+    const profile = await this.profileModel.create(profilePayload);
+
+    await this.userModel.findByIdAndUpdate(user.id, { profile: profile._id });
+    await this.profileModel.findByIdAndUpdate(profile.id, { user: user._id });
+
     return user;
   }
-  async createForGoogleStrategy(googlePayload: any): Promise<User> {
-    console.log('USERS SERVICE / createForGoogle');
-    const candidateByGoogleId = await this.userModel.findOne({
-      discordId: googlePayload.id,
-    });
-    console.log(
-      'USERS SERVICE / createForGoogle/ found user',
-      candidateByGoogleId,
-    );
-    if (candidateByGoogleId) return candidateByGoogleId;
+
+  async createForGoogleStrategy(googlePayload: GoogleProfile): Promise<User> {
+    this.logger.log('createForGoogle / init', googlePayload);
 
     const userPayload: Partial<User> = {
       email: googlePayload._json.email,
       locallyVerified: googlePayload._json.email_verified,
-      username: googlePayload._json.name,
       googleId: googlePayload.id,
-      ...(googlePayload.photos[0].value && {
-        avatar: googlePayload.photos[0].value,
-      }),
     };
     const user = await this.userModel.create(userPayload);
+
+    const profilePayload: Partial<Profile> = {};
+    profilePayload.user = user._id;
+    if (googlePayload._json.name)
+      profilePayload.username = googlePayload._json.name;
+    if (googlePayload.photos?.length)
+      profilePayload.avatar = googlePayload.photos[0].value;
+
+    const profile = await this.profileModel.create(profilePayload);
+
+    await this.userModel.findByIdAndUpdate(user.id, { profile: profile._id });
+    await this.profileModel.findByIdAndUpdate(profile.id, { user: user._id });
+
     return user;
   }
 

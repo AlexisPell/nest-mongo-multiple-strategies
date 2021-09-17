@@ -1,7 +1,7 @@
 import { CreateUserDto } from './../users/dto/create-user.dto';
 import { UsersService } from './../users/users.service';
-import { User, UserDocument } from './../users/user.document';
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { User, UserDocument } from '../users/models/user.document';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { Profile as DiscordProfile } from 'passport-discord';
 import { Profile as GoogleProfile } from 'passport-google-oauth20';
 import { Model } from 'mongoose';
@@ -10,6 +10,8 @@ import { InjectModel } from '@nestjs/mongoose';
 
 @Injectable()
 export class AuthService {
+  private logger: Logger = new Logger(AuthService.name);
+
   constructor(
     private usersService: UsersService,
     @InjectModel(User.name) private userModel: Model<UserDocument>,
@@ -21,7 +23,7 @@ export class AuthService {
   }
 
   async registration(userDto: CreateUserDto) {
-    console.log('AUTH SERVICE / REGISTRATION');
+    this.logger.log('AUTH SERVICE / REGISTRATION');
     const candidate = await this.userModel.findOne({ email: userDto.email });
     if (candidate) throw new BadRequestException('Such user already exists');
     const hashPassword = await bcrypt.hash(userDto.password, 5);
@@ -31,35 +33,49 @@ export class AuthService {
   }
 
   async validateDiscordProfile(userDto: DiscordProfile): Promise<User> {
-    console.log('AUTH SERVICE / VALIDATE DISCORD / INIT', userDto);
+    this.logger.log('VALIDATE DISCORD / INIT', userDto);
     const user = await this.userModel.findOne({ discordId: userDto.id });
-    console.log('AUTH SERVICE / VALIDATE DISCORD / USER', user);
-    if (user) return user;
+    if (user) {
+      this.logger.log(
+        `VALIDATE DISCORD / USER FOUND ${JSON.stringify(user, null, 2)}`,
+      );
+      return user;
+    }
     const newUser = await this.usersService.createForDiscordStrategy(userDto);
-    console.log('AUTH SERVICE / VALIDATE DISCORD / NEW USER', newUser);
+    this.logger.log('VALIDATE DISCORD / NEW USER', newUser);
     return newUser;
   }
   async validateGoogleProfile(userDto: GoogleProfile): Promise<User> {
-    console.log('AUTH SERVICE / VALIDATE GOOGLE / INIT', userDto);
+    this.logger.log(
+      `VALIDATE GOOGLE / INIT ${JSON.stringify(userDto, null, 2)}`,
+    );
     const user = await this.userModel.findOne({ googleId: userDto.id });
-    console.log('AUTH SERVICE / VALIDATE GOOGLE / USER', user);
-    if (user) return user;
+    if (user) {
+      this.logger.log(
+        `VALIDATE GOOGLE / USER FOUND ${JSON.stringify(user, null, 2)}`,
+      );
+      return user;
+    }
     const newUser = await this.usersService.createForGoogleStrategy(userDto);
-    console.log('AUTH SERVICE / VALIDATE GOOGLE / NEW USER', newUser);
+    this.logger.log(
+      `VALIDATE GOOGLE / NEW USER ${JSON.stringify(user, null, 2)}`,
+    );
     return newUser;
   }
   async validateLocalUser(userDto: CreateUserDto): Promise<User | undefined> {
-    console.log('AUTH SERVICE / VALIDATE LOCAL / INIT');
+    this.logger.log('VALIDATE LOCAL / INIT');
     const user = await this.userModel.findOne({ email: userDto.email });
-    if (!user)
+    if (!user) {
+      this.logger.log('VALIDATE LOCAL / USER NOT FOUND');
       throw new BadRequestException('User with such credentials not found');
-    console.log('AUTH SERVICE / VALIDATE LOCAL / USER FOUND', user);
+    }
+    this.logger.log('VALIDATE LOCAL / USER FOUND', user);
     const passwordsEqual = await bcrypt.compare(
       userDto.password,
       user.password || '',
     );
     if (passwordsEqual) {
-      console.log('AUTH SERVICE / VALIDATE LOCAL / PASSWORD MATCHED');
+      this.logger.log('AUTH SERVICE / VALIDATE LOCAL / PASSWORD MATCHED');
       return user;
     }
     if (!passwordsEqual)

@@ -1,4 +1,4 @@
-import { User } from './../users/user.document';
+import { User } from '../users/models/user.document';
 
 export enum STRATEGIES {
   LOCAL = 'local',

@@ -5,6 +5,7 @@ import {
   Body,
   Controller,
   Get,
+  Logger,
   Post,
   Req,
   Res,
@@ -15,26 +16,28 @@ import { Request, Response } from 'express';
 import { LocalAuthGuard } from '../guards/local.guard';
 import { AuthService } from '../auth.service';
 import { ApiTags, ApiOperation, ApiOkResponse } from '@nestjs/swagger';
-import { User } from 'src/users/user.document';
+import { User, UserDocument } from 'src/users/models/user.document';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
 
 @ApiTags('Authorization')
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  private logger: Logger = new Logger(AuthController.name);
 
-  @Get('test')
-  test() {
-    return { msg: 'Hello!' };
-  }
+  constructor(
+    private authService: AuthService,
+    @InjectModel(User.name) private userModel: Model<UserDocument>,
+  ) {}
 
   @ApiOperation({ summary: 'Get me, if logged in' })
   @ApiOkResponse({ type: User, description: 'User' })
   @Get('me')
   @UseGuards(AuthenticatedGuard)
   status(@Req() req: Request) {
-    console.log('REQUEST USER:', req.user);
-    console.log('REQUEST SESSION:', req.session);
-    console.log('REQUEST COOKIE:', req.cookies);
+    this.logger.log(`REQUEST USER: ${JSON.stringify(req.user, null, 2)}`);
+    // this.logger.log('REQUEST SESSION:', req.session);
+    // this.logger.log('REQUEST COOKIE:', req.cookies);
     return req.user;
   }
 
