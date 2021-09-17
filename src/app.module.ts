@@ -5,6 +5,8 @@ import { PassportModule } from '@nestjs/passport';
 
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
+import { WSAppGateway } from './wsapp.gateway';
+import { VoiceMessageModule } from './voice-messages/vm.module';
 
 @Module({
   imports: [
@@ -13,6 +15,8 @@ import { AuthModule } from './auth/auth.module';
     PassportModule.register({ session: true }),
     UsersModule,
     AuthModule,
+    VoiceMessageModule,
   ],
+  providers: [WSAppGateway],
 })
 export class AppModule {}

@@ -1,13 +1,15 @@
-import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
 import session from 'express-session';
 import passport from 'passport';
 import cookieParser from 'cookie-parser';
 import redis from 'redis';
 import connectRedis from 'connect-redis';
+
+import { NestFactory } from '@nestjs/core';
+import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+
+import { AppModule } from './app.module';
 import { ValidationPipe } from './common/pipes/validation.pipe';
 import { apiPrefix } from './common/constants/paths';
-import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -28,6 +30,9 @@ async function bootstrap() {
   const RedisStore = connectRedis(session);
 
   app.use(cookieParser());
+  app.enableCors({
+    origin: '*',
+  });
 
   app.use(
     session({

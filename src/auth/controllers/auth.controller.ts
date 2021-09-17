@@ -22,6 +22,11 @@ import { User } from 'src/users/user.document';
 export class AuthController {
   constructor(private authService: AuthService) {}
 
+  @Get('test')
+  test() {
+    return { msg: 'Hello!' };
+  }
+
   @ApiOperation({ summary: 'Get me, if logged in' })
   @ApiOkResponse({ type: User, description: 'User' })
   @Get('me')
