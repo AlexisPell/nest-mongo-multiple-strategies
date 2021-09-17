@@ -16,7 +16,7 @@ import {
   ApiBody,
   ApiQuery,
 } from '@nestjs/swagger';
-import { User } from './user.document';
+import { User } from './models/user.document';
 import { Request } from 'express';
 
 @ApiTags('Users')

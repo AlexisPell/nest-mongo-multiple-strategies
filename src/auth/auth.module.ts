@@ -1,5 +1,5 @@
 import { SessionSerializer } from './passport/passport.serializer';
-import { UserSchema, User } from './../users/user.document';
+import { UserSchema, User } from '../users/models/user.document';
 import { UsersModule } from './../users/users.module';
 import { forwardRef, Module } from '@nestjs/common';
 import { AuthService } from './auth.service';

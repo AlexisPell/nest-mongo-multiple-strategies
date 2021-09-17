@@ -1,6 +1,7 @@
 import { Prop, SchemaFactory, Schema } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
 import { ApiProperty } from '@nestjs/swagger';
+import { Document, Schema as MongooseSchema } from 'mongoose';
+import { Profile } from './profile.document';
 
 export type UserDocument = User & Document;
 
@@ -21,20 +22,19 @@ export class User extends Document {
   @Prop({ type: Boolean, default: false })
   locallyVerified: boolean;
 
-  @ApiProperty({ description: 'Username', example: 'SteveJob' })
-  @Prop({ type: String, minlength: 6, required: false })
-  username: string;
-
-  @ApiProperty({ description: 'Avatar of user', example: 'link to avatar' })
-  @Prop({ type: String })
-  avatar: string;
-
   @ApiProperty({ description: 'google account id' })
   @Prop({ type: String, unique: true, sparse: true }) // sparse to let uniqie while null
   googleId: string;
   @ApiProperty({ description: 'discord account id' })
   @Prop({ type: String, unique: true, sparse: true }) // sparse to let uniqie while null
   discordId: string;
+
+  @ApiProperty({
+    description: 'profile of current user (bio, username, etc...)',
+    type: () => Profile,
+  })
+  @Prop({ type: { type: MongooseSchema.Types.ObjectId, ref: 'Profile' } })
+  profile: Profile;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

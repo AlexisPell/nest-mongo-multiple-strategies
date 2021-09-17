@@ -11,7 +11,16 @@ import { VoiceMessageModule } from './voice-messages/vm.module';
 @Module({
   imports: [
     ConfigModule.forRoot({ envFilePath: `.${process.env.NODE_ENV}.env` }),
-    MongooseModule.forRoot(process.env.MONGO_URI as string),
+    // MongooseModule.forRoot(process.env.MONGO_URI as string),
+    MongooseModule.forRootAsync({
+      useFactory: async () => ({
+        uri: process.env.MONGO_URI as string,
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+        useCreateIndex: true,
+        useFindAndModify: false,
+      }),
+    }),
     PassportModule.register({ session: true }),
     UsersModule,
     AuthModule,
