@@ -11,6 +11,7 @@ import { WSAppGateway } from './wsapp.gateway';
 import { VoiceMessageModule } from './voice-messages/vm.module';
 import { FilesModule } from './files/files.module';
 import { srcPath } from './common/constants/paths';
+import { ProfilesModule } from './profiles/profiles.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { srcPath } from './common/constants/paths';
     AuthModule,
     FilesModule,
     VoiceMessageModule,
+    ProfilesModule,
   ],
   providers: [WSAppGateway],
 })

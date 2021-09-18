@@ -12,7 +12,7 @@ import { LocalStrategy } from './strategies/local.strategy';
 import { AuthController } from './controllers/auth.controller';
 import { GoogleAuthController } from './controllers/google-auth.controller';
 import { DiscordAuthController } from './controllers/discord-auth.controller';
-import { Profile, ProfileSchema } from 'src/users/models/profile.document';
+import { Profile, ProfileSchema } from 'src/profiles/profile.document';
 
 @Module({
   controllers: [AuthController, GoogleAuthController, DiscordAuthController],

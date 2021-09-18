@@ -7,7 +7,7 @@ import { Profile as GoogleProfile } from 'passport-google-oauth20';
 import { Model } from 'mongoose';
 import * as bcrypt from 'bcryptjs';
 import { InjectModel } from '@nestjs/mongoose';
-import { Profile, ProfileDocument } from 'src/users/models/profile.document';
+import { Profile, ProfileDocument } from 'src/profiles/profile.document';
 
 @Injectable()
 export class AuthService {

@@ -1,7 +1,7 @@
 import { Prop, SchemaFactory, Schema } from '@nestjs/mongoose';
 import { Document, Schema as MongooseSchema } from 'mongoose';
 import { ApiProperty } from '@nestjs/swagger';
-import { User } from './user.document';
+import { User } from '../users/models/user.document';
 
 export type ProfileDocument = Profile & Document;
 
