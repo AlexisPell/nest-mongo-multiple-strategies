@@ -12,6 +12,7 @@ import { LocalStrategy } from './strategies/local.strategy';
 import { AuthController } from './controllers/auth.controller';
 import { GoogleAuthController } from './controllers/google-auth.controller';
 import { DiscordAuthController } from './controllers/discord-auth.controller';
+import { Profile, ProfileSchema } from 'src/users/models/profile.document';
 
 @Module({
   controllers: [AuthController, GoogleAuthController, DiscordAuthController],
@@ -23,7 +24,10 @@ import { DiscordAuthController } from './controllers/discord-auth.controller';
     SessionSerializer,
   ],
   imports: [
-    MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
+    MongooseModule.forFeature([
+      { name: User.name, schema: UserSchema },
+      { name: Profile.name, schema: ProfileSchema },
+    ]),
     forwardRef(() => UsersModule),
   ],
   exports: [AuthService],

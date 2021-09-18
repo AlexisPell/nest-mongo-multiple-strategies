@@ -38,7 +38,6 @@ async function bootstrap() {
     session({
       cookie: { maxAge: 60000 * 60 * 24, httpOnly: true }, // day
       secret: process.env.SESSION_SECRET,
-      name: 'userSession',
       resave: false,
       saveUninitialized: false,
       store: new RedisStore({ client: redisClient }),

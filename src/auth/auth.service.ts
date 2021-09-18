@@ -7,6 +7,7 @@ import { Profile as GoogleProfile } from 'passport-google-oauth20';
 import { Model } from 'mongoose';
 import * as bcrypt from 'bcryptjs';
 import { InjectModel } from '@nestjs/mongoose';
+import { Profile, ProfileDocument } from 'src/users/models/profile.document';
 
 @Injectable()
 export class AuthService {
@@ -15,6 +16,7 @@ export class AuthService {
   constructor(
     private usersService: UsersService,
     @InjectModel(User.name) private userModel: Model<UserDocument>,
+    @InjectModel(Profile.name) private profileModel: Model<ProfileDocument>,
   ) {}
 
   async login(userDto: CreateUserDto) {
@@ -29,6 +31,11 @@ export class AuthService {
     const hashPassword = await bcrypt.hash(userDto.password, 5);
     const _user: CreateUserDto = { ...userDto, password: hashPassword };
     const user = await this.userModel.create(_user);
+    const profile = await this.profileModel.create({ user: user._id });
+
+    await this.userModel.findByIdAndUpdate(user.id, { profile: profile._id });
+    await this.profileModel.findByIdAndUpdate(profile.id, { user: user._id });
+
     return user;
   }
 

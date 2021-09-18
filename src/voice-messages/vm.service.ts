@@ -1,8 +1,10 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { FilesService } from './../files/files.service';
+import { Injectable, Logger, BadRequestException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, ObjectId } from 'mongoose';
 import { CreateVMDto } from './dto/create-vm.dto';
 import { VoiceMessage, VoiceMessageDocument } from './vm.document';
+import { FILE_TYPE } from 'src/files/files.interfaces';
 
 @Injectable()
 export class VoiceMessagesService {
@@ -11,23 +13,49 @@ export class VoiceMessagesService {
   constructor(
     @InjectModel(VoiceMessage.name)
     private voiceMessageModel: Model<VoiceMessageDocument>,
+    private filesService: FilesService,
   ) {}
 
   async getAll(): Promise<VoiceMessage[] | string> {
     this.logger.log(`Voice message // get all`);
-    return 'All voice messages';
+    return await this.voiceMessageModel.find();
   }
-  async getOne(): Promise<VoiceMessage | string> {
+
+  async getOne(vmId: ObjectId | string): Promise<VoiceMessage> {
     this.logger.log(`Voice message // get one`);
-    return '';
+    const voiceMessage = await this.voiceMessageModel.findById(vmId);
+    if (!voiceMessage)
+      throw new BadRequestException('Such voice message not found');
+    return voiceMessage;
   }
-  async create(vmDto: CreateVMDto): Promise<VoiceMessage> {
-    this.logger.log(`Voice message // create`);
-    const vm = await this.voiceMessageModel.create(vmDto);
+
+  async create(
+    profileId: string,
+    audio: Express.Multer.File,
+  ): Promise<VoiceMessage> {
+    const pathToVoiceMessage = this.filesService.createFile(
+      FILE_TYPE['VOICE_MESSAGE'],
+      audio,
+    );
+    const vm = await this.voiceMessageModel.create({
+      profileId,
+      audio: pathToVoiceMessage,
+    });
     return vm;
   }
-  async delete(): Promise<boolean> {
-    this.logger.log(`Voice message // delete`);
-    return true;
+
+  async delete(vmId: string): Promise<boolean> {
+    try {
+      this.logger.log(`Voice message // delete`);
+      const deletingVM = await this.voiceMessageModel.findOneAndDelete({
+        _id: vmId,
+      });
+      if (deletingVM) {
+        this.filesService.removeFile(deletingVM?.audio);
+      }
+      return true;
+    } catch (e) {
+      throw new BadRequestException('Bad request for deleting voice message');
+    }
   }
 }

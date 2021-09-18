@@ -40,8 +40,13 @@ export class UsersService {
     return user;
   }
 
-  async createUser(validatedDto: CreateUserDto): Promise<User> {
+  async createUserWithProfile(validatedDto: CreateUserDto): Promise<User> {
     const user = await this.userModel.create(validatedDto);
+    const profile = await this.profileModel.create({ user: user._id });
+
+    await this.userModel.findByIdAndUpdate(user.id, { profile: profile._id });
+    await this.profileModel.findByIdAndUpdate(profile.id, { user: user._id });
+
     return user;
   }
 
