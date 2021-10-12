@@ -1,6 +1,6 @@
 import { CreateUserDto } from './../users/dto/create-user.dto';
 import { UsersService } from './../users/users.service';
-import { User, UserDocument } from '../users/models/user.document';
+import { User, UserDocument } from '../users/user.document';
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { Profile as DiscordProfile } from 'passport-discord';
 import { Profile as GoogleProfile } from 'passport-google-oauth20';

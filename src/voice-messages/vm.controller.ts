@@ -1,5 +1,4 @@
 import {
-  Body,
   Get,
   Post,
   Req,
@@ -7,6 +6,7 @@ import {
   Delete,
   UploadedFile,
   UseInterceptors,
+  UseGuards,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import {
@@ -16,7 +16,7 @@ import {
   ApiOkResponse,
 } from '@nestjs/swagger';
 import { Request } from 'express';
-import { CreateVMDto } from './dto/create-vm.dto';
+import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { VoiceMessage } from './vm.document';
 import { VoiceMessagesService } from './vm.service';
 
@@ -27,6 +27,7 @@ export class VoiceMessageController {
 
   @ApiOperation({ summary: 'Get all voice messages' })
   @ApiOkResponse({ type: [VoiceMessage], description: 'All voice messages' })
+  @UseGuards(AuthGuard)
   @Get()
   getAll() {
     return this.voiceMessagesService.getAll();

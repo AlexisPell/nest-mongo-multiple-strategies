@@ -4,7 +4,7 @@ import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
 import { AuthModule } from './../auth/auth.module';
 
-import { User, UserSchema } from './models/user.document';
+import { User, UserSchema } from './user.document';
 import { Profile, ProfileSchema } from '../profiles/profile.document';
 
 @Module({

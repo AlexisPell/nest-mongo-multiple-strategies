@@ -5,7 +5,7 @@ import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
-import { UserDocument, User } from './models/user.document';
+import { UserDocument, User } from './user.document';
 import { Profile, ProfileDocument } from '../profiles/profile.document';
 
 @Injectable()

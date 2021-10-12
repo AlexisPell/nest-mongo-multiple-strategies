@@ -1,4 +1,9 @@
-import { User } from '../users/models/user.document';
+import { SetMetadata } from '@nestjs/common';
+import { User } from '../users/user.document';
+
+export const ROLES_KEY = 'roles';
+
+export const Roles = (...roles: string[]) => SetMetadata(ROLES_KEY, roles);
 
 export enum STRATEGIES {
   LOCAL = 'local',

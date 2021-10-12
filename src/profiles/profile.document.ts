@@ -1,9 +1,15 @@
 import { Prop, SchemaFactory, Schema } from '@nestjs/mongoose';
 import { Document, Schema as MongooseSchema } from 'mongoose';
 import { ApiProperty } from '@nestjs/swagger';
-import { User } from '../users/models/user.document';
+import { User } from '../users/user.document';
 
 export type ProfileDocument = Profile & Document;
+
+export enum PROFILE_ROLES {
+  COMMON = 'common',
+  ADMIN = 'admin',
+  MODERATOR = 'moderator',
+}
 
 @Schema({ timestamps: true })
 export class Profile extends Document {
@@ -14,6 +20,13 @@ export class Profile extends Document {
   })
   @Prop({ type: { type: MongooseSchema.Types.ObjectId, ref: 'User' } })
   user: User;
+
+  @ApiProperty({
+    description: 'Profile role',
+    example: 'common | admin | moderator',
+  })
+  @Prop({ type: PROFILE_ROLES, default: [PROFILE_ROLES.COMMON] })
+  roles: string[];
 
   @ApiProperty({ description: 'Username', example: 'SteveJob' })
   @Prop({ type: String })
